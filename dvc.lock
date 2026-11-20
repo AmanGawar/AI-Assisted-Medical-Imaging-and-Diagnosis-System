@@ -1,0 +1,93 @@
+schema: '2.0'
+stages:
+  train-classifier:
+    cmd: python ml/train_classifier.py --archive data/rsna/images.zip
+      --annotations data/rsna/annotations.json --output models/classifier.pt
+      --metrics-output reports/classifier_metrics.json --epochs 2 --batch-size 8
+      --max-samples 2000 --seed 42
+    deps:
+    - path: data/rsna/annotations.json
+      hash: md5
+      md5: 19842a8460a068e18df3e96b8206160f
+      size: 19556559
+    - path: data/rsna/images.zip
+      hash: md5
+      md5: 04dba6ff18b5cef6108a4650b063d9b4
+      size: 3410618175
+    - path: ml/rsna_data.py
+      hash: md5
+      md5: 09b20428340902b821af5aca0ec9421a
+      size: 3550
+    - path: ml/train_classifier.py
+      hash: md5
+      md5: e0af66a5ff2d39fd8b91c32dd81d81c6
+      size: 9482
+    params:
+      params.yaml:
+        classifier:
+          archive: data/rsna/images.zip
+          annotations: data/rsna/annotations.json
+          output: models/classifier.pt
+          metrics_output: reports/classifier_metrics.json
+          epochs: 2
+          batch_size: 8
+          max_samples: 2000
+          seed: 42
+    outs:
+    - path: models/classifier.pt
+      hash: md5
+      md5: c0ab5a6f4338a226fb98d9126b3257de
+      size: 28416277
+    - path: reports/classifier_metrics.json
+      hash: md5
+      md5: bdf3efe57e369d7f58398b3e47d9f34c
+      size: 736
+  train-segmentation:
+    cmd: python ml/train_segmentation.py --data-dir data/msd/Task06_Lung
+      --output models/segmentation.pt --metrics-output
+      reports/segmentation_metrics.json --epochs 10 --batch-size 1 --max-cases
+      16 --roi-size 64 --validation-fraction 0.25 --seed 42
+    deps:
+    - path: backend/app/segmentation.py
+      hash: md5
+      md5: e4492493b461a4e19721915b042db2cf
+      size: 8917
+    - path: data/msd/Task06_Lung/dataset.json
+      hash: md5
+      md5: 9f1b7c2326b6fac265361d0c8643b263
+      size: 6062
+    - path: data/msd/Task06_Lung/imagesTr
+      hash: md5
+      md5: ab5319848f75c988fb7ab0d0e39c065d.dir
+      size: 6090496863
+      nfiles: 126
+    - path: data/msd/Task06_Lung/labelsTr
+      hash: md5
+      md5: 2e3175fafdb97459dee00f75b26e0a3e.dir
+      size: 4688575
+      nfiles: 126
+    - path: ml/train_segmentation.py
+      hash: md5
+      md5: 953802aaf17cbce8b3d64c3dc64aa83d
+      size: 9834
+    params:
+      params.yaml:
+        segmentation:
+          data_dir: data/msd/Task06_Lung
+          output: models/segmentation.pt
+          metrics_output: reports/segmentation_metrics.json
+          epochs: 10
+          batch_size: 1
+          max_cases: 16
+          roi_size: 64
+          validation_fraction: 0.25
+          seed: 42
+    outs:
+    - path: models/segmentation.pt
+      hash: md5
+      md5: 6d5cf2c2a349444ae27444954096b647
+      size: 1994270
+    - path: reports/segmentation_metrics.json
+      hash: md5
+      md5: f15f655bcaa0951c53a16fcb8d8a9642
+      size: 437

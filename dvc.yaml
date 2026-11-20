@@ -1,0 +1,30 @@
+stages:
+  train-classifier:
+    cmd: python ml/train_classifier.py --archive ${classifier.archive} --annotations ${classifier.annotations} --output ${classifier.output} --metrics-output ${classifier.metrics_output} --epochs ${classifier.epochs} --batch-size ${classifier.batch_size} --max-samples ${classifier.max_samples} --seed ${classifier.seed}
+    deps:
+      - ml/train_classifier.py
+      - ml/rsna_data.py
+      - ${classifier.archive}
+      - ${classifier.annotations}
+    params:
+      - classifier
+    outs:
+      - ${classifier.output}
+    metrics:
+      - ${classifier.metrics_output}:
+          cache: false
+  train-segmentation:
+    cmd: python ml/train_segmentation.py --data-dir ${segmentation.data_dir} --output ${segmentation.output} --metrics-output ${segmentation.metrics_output} --epochs ${segmentation.epochs} --batch-size ${segmentation.batch_size} --max-cases ${segmentation.max_cases} --roi-size ${segmentation.roi_size} --validation-fraction ${segmentation.validation_fraction} --seed ${segmentation.seed}
+    deps:
+      - ml/train_segmentation.py
+      - backend/app/segmentation.py
+      - ${segmentation.data_dir}/dataset.json
+      - ${segmentation.data_dir}/imagesTr
+      - ${segmentation.data_dir}/labelsTr
+    params:
+      - segmentation
+    outs:
+      - ${segmentation.output}
+    metrics:
+      - ${segmentation.metrics_output}:
+          cache: false

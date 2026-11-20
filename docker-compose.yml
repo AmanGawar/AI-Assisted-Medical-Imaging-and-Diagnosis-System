@@ -1,0 +1,72 @@
+services:
+  orthanc:
+    image: orthancteam/orthanc:26.11.1
+    environment:
+      ORTHANC__NAME: Educational Imaging Prototype
+      ORTHANC__AUTHENTICATION_ENABLED: "true"
+      ORTHANC__REGISTERED_USERS: |
+        {"${ORTHANC_USERNAME:-demo}": "${ORTHANC_PASSWORD:-demo-only-change-me}"}
+      ORTHANC__REMOTE_ACCESS_ALLOWED: "true"
+    ports:
+      - "127.0.0.1:8042:8042"
+      - "127.0.0.1:4242:4242"
+    volumes:
+      - orthanc-storage:/var/lib/orthanc/db
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      ORTHANC_URL: http://orthanc:8042
+      ORTHANC_USERNAME: ${ORTHANC_USERNAME:-demo}
+      ORTHANC_PASSWORD: ${ORTHANC_PASSWORD:-demo-only-change-me}
+      AUDIT_DB: /data/audit.sqlite3
+      MODEL_CHECKPOINT: /models/classifier.pt
+      SEGMENTATION_CHECKPOINT: /models/segmentation.pt
+      AUTO_ANALYZE: ${AUTO_ANALYZE:-true}
+      ORTHANC_POLL_INTERVAL_SECONDS: ${ORTHANC_POLL_INTERVAL_SECONDS:-5}
+      STUDY_STABILITY_SECONDS: ${STUDY_STABILITY_SECONDS:-15}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - audit-data:/data
+      - ./models:/models:ro
+    depends_on:
+      - orthanc
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).read()"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./web
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:5173').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  orthanc-storage:
+  audit-data:

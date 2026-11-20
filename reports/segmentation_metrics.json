@@ -1,0 +1,17 @@
+{
+  "dataset": "Medical Segmentation Decathlon Task06_Lung",
+  "seed": 42,
+  "train_cases": 12,
+  "validation_cases": 4,
+  "epochs": 10,
+  "roi_size": [
+    64,
+    64,
+    64
+  ],
+  "validation_foreground_dice_by_class": {
+    "cancer": 0.00024429463647835336
+  },
+  "mean_validation_foreground_dice": 0.00024429463647835336,
+  "evaluation_note": "Internal held-out subset only; not a clinical performance estimate."
+}

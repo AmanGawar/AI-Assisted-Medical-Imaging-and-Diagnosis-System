@@ -1,0 +1,17 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+.pytest_cache/
+node_modules/
+dist/
+data/rsna/*.zip
+data/rsna/annotations.json
+data/msd/*.tar
+data/msd/Task06_Lung/
+*.dcm
+models/*.pt
+models/*.pth
+*.sqlite3
+.dvc/cache/
